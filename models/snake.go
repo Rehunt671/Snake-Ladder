@@ -11,10 +11,3 @@ func NewSnake(start int, end int) *Snake {
 		end:   end,
 	}
 }
-
-func (s *Snake) GetStart() int {
-	return s.start
-}
-func (s *Snake) GetEnd() int {
-	return s.end
-}

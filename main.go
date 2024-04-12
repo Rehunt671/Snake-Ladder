@@ -25,12 +25,12 @@ func askNumLadder() int {
 }
 
 func main() {
+
 	numSnakes := askNumSnake()
 	numLadders := askNumLadder()
 	game := models.NewGame(numSnakes,numLadders,10)
 	game.AddPlayer("red")
 	game.AddPlayer("greed")
 	game.AddPlayer("blue")
-
 	game.Play()
 }

@@ -13,6 +13,7 @@ type Player struct {
 func NewPlayer(name string) *Player {
 	return &Player{
 		name : name,
+		pos :  1,
 	}
 }
 
@@ -20,18 +21,24 @@ func (p *Player) Move(roll int) {
 	game := GetGameInstance()
 	board := game.board
 	boardSize := board.size*board.size
-	
+
+
+	board.RemoveStandOn(p);
 	newPos := p.pos + roll
+	
 	if newPos > boardSize {
 		gap := newPos - boardSize
 		newPos = boardSize - gap
 		p.pos = newPos
 	} else {
-		p.pos = board.GetNewPosition(newPos)
-		if board.IsDestination(p.pos) {
-			fmt.Printf("%50s\n", "Won!!!")
-			p.pos = 0;
-			p.win = true
-		}
+		newPos = board.GetNewPosition(newPos)
+		p.pos = newPos
 	}
+
+	board.AddStandOn(p);
+	if board.IsDestination(p.pos) {
+		fmt.Printf("%50s\n", "Won!!!")
+		p.win = true
+	}
+
 }

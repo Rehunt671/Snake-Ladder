@@ -1,7 +1,9 @@
 package models
 
+//package is a collection of source files in the same directory that are compiled together
 import (
 	"fmt"
+	"strings"
 )
 
 
@@ -14,7 +16,7 @@ type Game struct {
 	firstPlayer *Player
 }
 
-// ไม่มี Constructor in golang ,So we have to create Global func to setter for struct
+// Don't have Constructor in golang ,So we have to create Global func to setter for struct
 func NewGame(numberOfSnakes int, numberOfLadders int, boardSize int) *Game {
 	gameInstance =  &Game{
 			dice:    NewDice(6),
@@ -34,7 +36,9 @@ func GetGameInstance() *Game {
 
 //ตัว pointer receiver จะเป็นตัวบอกว่า method นั้นๆจะใช้ได้แค่กับ struct ของ pointer เท่านั้น
 func (g *Game) 	AddPlayer(name string){
-	g.players = append(g.players, NewPlayer(name))
+	player := NewPlayer(name)
+	g.players = append(g.players,player)
+	g.board.AddStandOn(player)
 	if len(g.players) == 1 {
 		g.firstPlayer = g.players[0]
 	}
@@ -57,7 +61,7 @@ func (g *Game) Play() {
 		g.printPlayerPosition(curPlayer)
 
 		if g.isWinAll() {
-			g.resetAndContinue()
+			g.resetGame()
 			continue
 		}
 
@@ -91,32 +95,47 @@ func (g *Game) printPlayerPosition(player *Player) {
 	fmt.Printf("%45s %s %d\n", player.name, "Position =", player.pos)
 }
 
-func (g *Game) resetAndContinue() {
+func (g *Game) resetPlayersInfo(){
+	for _, player := range g.players {
+		player.pos = 0
+		player.win = false 
+	}
+}
+
+func (g *Game) resetQueue(){
+	for g.players[0] != g.firstPlayer {
+		g.players = append(g.players[1:], g.players[0])
+	}
+}
+
+func (g *Game) resetGame() {
 	fmt.Printf("%65s\n", "All Player is Winning Reset Game!!")
 	fmt.Println("----------------------------------------------------------------------------------------------------------")
-	g.resetGame()
+	g.resetPlayersInfo()
+	g.resetQueue()
 }
 
 func (g *Game) render() {
 	board := g.board
-	// snakes := board.snakes
-	// ladders := board.ladders
 	size := board.size
 
 	fmt.Println("----------------------------------------------------------------------------------------------------------")
 	
-	for i := size ; i > 0  ; i-- {
-		if i % 2 == 0 {
-			for j := 0 ; j < size ; j++ {
-				fmt.Printf("%10d", size * i - j) 
+	for i := size - 1 ; i >= 0  ; i-- {
+		for j := 0 ; j < size ; j++ {
+			symbols := ""
+			if len(board.regions[i][j].standOn) > 0 {
+				symbols = board.regions[i][j].standOn[len(board.regions[i][j].standOn)-1].name
+			}else{
+				symbols = strings.Join(board.regions[i][j].symbols, ",")
 			}
-		}else{
-			for j := size - 1 ; j >= 0 ; j-- {
-				fmt.Printf("%10d", size * i - j) 
-			}
+
+			fmt.Printf("%18s",symbols)
 		}
+		
 		fmt.Println()
 	}
+
 
 	fmt.Println("----------------------------------------------------------------------------------------------------------")
 
@@ -133,23 +152,7 @@ func (g *Game) isWinAll() bool {
 	return winCount == len(g.players) - 1
 }
 
-func (g *Game) resetPlayers(){
-	for _, player := range g.players {
-		player.pos = 0
-		player.win = false 
-	}
-}
 
-func (g *Game) resetQueue(){
-	for g.players[0] != g.firstPlayer {
-		g.players = append(g.players[1:], g.players[0])
-	}
-}
-
-func (g *Game) resetGame() {
-	g.resetPlayers()
-	g.resetQueue()
-}
 
 func (g *Game) changeTurn() {
 	g.players = append(g.players[1:], g.players[0])
