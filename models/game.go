@@ -6,26 +6,32 @@ import (
 	"strings"
 )
 
-var gameInstance *Game
+var gameInstance Game
 
-type Game struct {
-	dice    *Dice
-	board   *Board
-	players []*Player
-	firstPlayer *Player
+
+type Game interface {
+	AddPlayer(name string)
+	Play()
+}
+
+type gameImpl struct {
+	dice    Dice
+	board   Board
+	players []Player
+	firstPlayer Player
 }
 
 // Don't have Constructor in golang ,So we have to create Global func to setter for struct
-func NewGame(numberOfSnakes int, numberOfLadders int, boardSize int) *Game {
-	gameInstance =  &Game{
+func NewGame(numberOfSnakes int, numberOfLadders int, boardSize int) Game {
+	gameInstance =  &gameImpl{
 			dice:    NewDice(6),
 			board:   NewBoard(numberOfSnakes, numberOfLadders, boardSize),
-			players: []*Player{},
+			players: []Player{},
 	}
 	return gameInstance
 }
 
-func GetGameInstance() *Game {
+func GetGameInstance() Game {
 	if gameInstance == nil {
 		gameInstance = NewGame(1,1,10);
 	}
@@ -33,16 +39,16 @@ func GetGameInstance() *Game {
 }
 
 //ตัว pointer receiver จะเป็นตัวบอกว่า method นั้นๆจะใช้ได้แค่กับ struct ของ pointer เท่านั้น
-func (g *Game) AddPlayer(name string){
+func (g *gameImpl) AddPlayer(name string){
 	player := NewPlayer(name)
 	g.players = append(g.players,player)
-	g.board.AddStandOn(player)
+	g.board.SetPosition(player , 1)	
 	if len(g.players) == 1 {
 		g.firstPlayer = g.players[0]
 	}
 }
 
-func (g *Game) Play() {
+func (g *gameImpl) Play() {
 	g.render()
 
 	for {
@@ -58,75 +64,76 @@ func (g *Game) Play() {
 }
 
 
-func (g *Game) playRound() {
+func (g *gameImpl) playRound() {
 	curPlayer := g.getCurrentPlayer()
 	g.printInformation(curPlayer)
 	
-	roll := curPlayer.RollDice()
+	roll := g.dice.Roll()
 	g.printRoll(roll)
 
-	curPlayer.Move(roll)
+	g.board.SetPosition(curPlayer , curPlayer.GetPos() + roll)
 	g.printPlayerPosition(curPlayer)
 }
 
-func (g *Game) getCurrentPlayer() *Player {
+func (g *gameImpl) getCurrentPlayer() Player {
 	return g.players[0]
 }
 
-func (g *Game) resetBoard(){
+func (g *gameImpl) resetBoard(){
 	board := g.board
-	size := board.size
-	regions := board.regions
+	size := board.GetSize()
 
 	for i := 0 ; i < size ; i++{
 		for j := 0 ; j < size ; j++{
-			regions[i][j].standOn = regions[i][j].standOn[:0]
+			path := board.GetPath(i,j)
+			standOn := path.GetStandOn()
+			path.SetStandOn(standOn[:0])
 		}
 	}
 	
 }
 
-func (g *Game) resetPlayersInfo(){
+func (g *gameImpl) resetPlayersInfo(){
 	board := g.board
 	for _, player := range g.players {
-		player.pos = 1
-		player.win = false 
-		board.AddStandOn(player)
+		board.SetPosition(player , 1)
+		player.SetWin(false) 
 	}
 }
 
-func (g *Game) resetQueue(){
+func (g *gameImpl) resetQueue(){
 	for g.players[0] != g.firstPlayer {
 		g.players = append(g.players[1:], g.players[0])
 	}
 }
 
-func (g *Game) resetGame() {
+func (g *gameImpl) resetGame() {
 	fmt.Printf("%92s\n", "All Player is Winning Reset Game!!")
 	g.resetBoard()	
 	g.resetPlayersInfo()
 	g.resetQueue()
 }
 
-func (g *Game) render() {
+func (g *gameImpl) render() {
 	board := g.board
-	size := board.size
+	size := board.GetSize()
 
 	g.printBoarder()
 
 	for i := size - 1 ; i >= 0  ; i-- {
 		for j := 0 ; j < size ; j++ {
 			symbols := ""
-			if len(board.regions[i][j].standOn) > 0 {
+			path := board.GetPath(i,j)
+			if len(path.GetStandOn()) > 0 {
 
 				names  := []string{}
-				for _, player := range board.regions[i][j].standOn {
-					names = append(names, player.name)
+				for _, player := range path.GetStandOn() {
+					names = append(names, player.GetName())
 				}
 				symbols = strings.Join(names, ",")
 				
 			}else{
-				symbols = strings.Join(board.regions[i][j].symbols, ",")
+				symbols = strings.Join(path.GetSymbols(), ",")
 			}
 
 			fmt.Printf("%15s",symbols)
@@ -139,10 +146,10 @@ func (g *Game) render() {
 
 }
 
-func (g *Game) isWinAll() bool {
+func (g *gameImpl) isWinAll() bool {
 	winCount := 0
 	for _, player := range g.players {
-			if player.win {
+			if player.GetWin() {
 					winCount++
 			}
 	}
@@ -150,28 +157,28 @@ func (g *Game) isWinAll() bool {
 	return winCount == len(g.players) - 1
 }
 
-func (g *Game) changeTurn() {
+func (g *gameImpl) changeTurn() {
 	g.players = append(g.players[1:], g.players[0])
-	for g.players[0].win {
+	for g.players[0].GetWin() {
 		g.players = append(g.players[1:], g.players[0])
 	}
 }
 
 
-func (g *Game)printBoarder()	{
+func (g *gameImpl)printBoarder()	{
 	fmt.Println("-------------------------------------------------------------------------------------------------------------------------------------------------------------")
 }
 
-func (g *Game) printInformation(player *Player) {
-	fmt.Printf("%80s %s\n", "Current Player =", player.name)
+func (g *gameImpl) printInformation(p Player) {
+	fmt.Printf("%80s %s\n", "Current Player =", p.GetName())
 	fmt.Printf("%86s\n", "Press Enter to Roll!!!")
 	fmt.Scanln()
 }
 
-func (g *Game) printRoll(roll int) {
+func (g *gameImpl) printRoll(roll int) {
 	fmt.Printf("%77s %d\n", "Roll =", roll)
 }
 
-func (g *Game) printPlayerPosition(player *Player) {
-	fmt.Printf("%70s %s %d\n", player.name, "Position =", player.pos)
+func (g *gameImpl) printPlayerPosition(p Player) {
+	fmt.Printf("%70s %s %d\n", p.GetName(), "Position =", p.GetPos())
 }

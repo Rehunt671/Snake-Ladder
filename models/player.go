@@ -1,50 +1,41 @@
 package models
 
-import "fmt"
+type Player interface{
+	GetName() string
+	GetPos() int
+	SetPos(int) 
+	SetWin(bool)
+	GetWin() bool
+}
 
-
-type Player struct {
+type playerImpl struct {
 	name string
 	pos int
 	// color int
-	win bool
+	isWin bool
 }
 
-func NewPlayer(name string) *Player {
-	return &Player{
+func NewPlayer(name string) Player {
+	return &playerImpl{
 		name : name,
 		pos :  1,
 	}
 }
 
-func (p *Player) RollDice() int {
-	game := GetGameInstance()
-	dice := game.dice
-	return dice.Roll()
+func (p *playerImpl) GetPos() int {
+	return p.pos
+}
+func (p *playerImpl) GetName() string {
+	return p.name
 }
 
-func (p *Player) Move(roll int) {
-	game := GetGameInstance()
-	board := game.board
-	boardSize := board.size*board.size
+func (p *playerImpl) SetPos(newPos int)  {
+	 p.pos = newPos
+}
 
-
-	board.RemoveStandOn(p);
-	newPos := p.pos + roll
-	
-	if newPos > boardSize {
-		gap := newPos - boardSize
-		newPos = boardSize - gap
-		p.pos = newPos
-	} else {
-		newPos = board.GetNewPosition(newPos)
-		p.pos = newPos
-	}
-
-	board.AddStandOn(p);
-	if board.IsDestination(p.pos) {
-		fmt.Printf("%78s\n", "Won!!!")
-		p.win = true
-	}
-
+func (p *playerImpl) SetWin(isWin bool)  {
+	 p.isWin = isWin
+}
+func (p *playerImpl) GetWin() bool  {
+	return p.isWin
 }
