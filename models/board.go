@@ -21,8 +21,7 @@ func NewBoard(numSnakes int, numLadders int, size int) *Board {
 	}
 
 	snakeLadderMap := make(map[string]bool)
-	b.initLadders(numLadders,size,&snakeLadderMap)
-	b.initSnakes(numSnakes,size,&snakeLadderMap)
+	b.initSnakesAndLadders(numSnakes , numLadders , size , &snakeLadderMap)
 	b.initRegions();
 	return b
 }
@@ -33,12 +32,12 @@ func (b *Board) IsDestination(pos int) bool {
 
 func (b *Board) GetNewPosition(pos int) int {
 	if ok, val := b.isLadder(pos); ok {
-		fmt.Printf("%55s %d, to: %d\n","Climb ladder. Go up from:", pos, val)
+		fmt.Printf("%82s %d, to: %d\n","Climb ladder!!. Go up from:", pos, val)
 		return val
 	}
 
 	if ok, val := b.isSnake(pos); ok {
-		fmt.Printf("%55s %d, to: %d\n","OOps got bitten by snake!!!. Down from:", pos, val)
+		fmt.Printf("%88s %d, to: %d\n","Oops got bitten by snake!!!. Down from:", pos, val)
 		return val
 	}
 
@@ -102,37 +101,24 @@ func (b *Board) initRegions(){
 
 }
 
-func (b *Board) initSnakes(numSnakes int , size int , snakeLadderMap  *map[string]bool){
+func (b *Board) initSnakesAndLadders(numSnakes, numLadders, size int, snakeLadderMap *map[string]bool) {
 	boardSize := size * size
-	for i := 0; i < numSnakes; i++ {
+
+	for i := 0; i < numSnakes + numLadders; i++ {
 		for {
-			start := rand.Intn(boardSize) + 1		// 1 - 100
-			end := rand.Intn(boardSize) + 1			// 1 - 100
-			if end >= start || start == size {
+			start := rand.Intn(boardSize) + 1
+			end := rand.Intn(boardSize) + 1
+			if start == size || end == size || start == end {
 				continue
 			}
-			if _, ok := (*snakeLadderMap)[fmt.Sprintf("%d:%d", start, end)]; !ok {
-				b.snakes = append(b.snakes, NewSnake(start, end))
-				(*snakeLadderMap)[fmt.Sprintf("%d:%d", start, end)] = true
-				break
-			}
-		}
-	}
-
-}
-
-func (b *Board) initLadders(numLadders int , size int , snakeLadderMap  *map[string]bool){
-	boardSize := size * size
-	for i := 0; i < numLadders; i++ {
-		for {
-			start := rand.Intn(boardSize) + 1		// 1 - 100
-			end := rand.Intn(boardSize) + 1			// 1 - 100
-			if start >=  end || start == size {
-				continue
-			}
-			if _, ok := (*snakeLadderMap)[fmt.Sprintf("%d:%d", start, end)]; !ok {
-				b.ladders = append(b.ladders, NewLadder(start, end))
-				(*snakeLadderMap)[fmt.Sprintf("%d:%d", start, end)] = true
+			key := fmt.Sprintf("%d:%d", start, end)
+			if _, ok := (*snakeLadderMap)[key]; !ok {
+				if start > end {
+					b.snakes = append(b.snakes, NewSnake(start, end))
+				} else {
+					b.ladders = append(b.ladders, NewLadder(start, end))
+				}
+				(*snakeLadderMap)[key] = true
 				break
 			}
 		}

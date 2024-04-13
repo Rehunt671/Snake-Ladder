@@ -17,6 +17,12 @@ func NewPlayer(name string) *Player {
 	}
 }
 
+func (p *Player) RollDice() int {
+	game := GetGameInstance()
+	dice := game.dice
+	return dice.Roll()
+}
+
 func (p *Player) Move(roll int) {
 	game := GetGameInstance()
 	board := game.board
@@ -37,7 +43,7 @@ func (p *Player) Move(roll int) {
 
 	board.AddStandOn(p);
 	if board.IsDestination(p.pos) {
-		fmt.Printf("%50s\n", "Won!!!")
+		fmt.Printf("%78s\n", "Won!!!")
 		p.win = true
 	}
 

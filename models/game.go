@@ -6,7 +6,6 @@ import (
 	"strings"
 )
 
-
 var gameInstance *Game
 
 type Game struct {
@@ -33,9 +32,8 @@ func GetGameInstance() *Game {
   return gameInstance;
 }
 
-
 //ตัว pointer receiver จะเป็นตัวบอกว่า method นั้นๆจะใช้ได้แค่กับ struct ของ pointer เท่านั้น
-func (g *Game) 	AddPlayer(name string){
+func (g *Game) AddPlayer(name string){
 	player := NewPlayer(name)
 	g.players = append(g.players,player)
 	g.board.AddStandOn(player)
@@ -49,12 +47,9 @@ func (g *Game) Play() {
 
 	for {
 		curPlayer := g.getCurrentPlayer()
+		g.printInformation(curPlayer)
 
-		g.printCurrentPlayer(curPlayer)
-
-		g.waitForRoll()
-
-		roll := g.rollDice()
+		roll := curPlayer.RollDice()
 		g.printRoll(roll)
 
 		curPlayer.Move(roll)
@@ -62,6 +57,7 @@ func (g *Game) Play() {
 
 		if g.isWinAll() {
 			g.resetGame()
+			g.render()
 			continue
 		}
 
@@ -74,31 +70,25 @@ func (g *Game) getCurrentPlayer() *Player {
 	return g.players[0]
 }
 
-func (g *Game) printCurrentPlayer(player *Player) {
-	fmt.Printf("%55s %s\n", "Current Player =", player.name)
-}
+func (g *Game) resetBoard(){
+	board := g.board
+	size := board.size
+	regions := board.regions
 
-func (g *Game) waitForRoll() {
-	fmt.Printf("%61s\n", "Press Enter to Roll!!!")
-	fmt.Scanln()
-}
-
-func (g *Game) rollDice() int {
-	return g.dice.Roll()
-}
-
-func (g *Game) printRoll(roll int) {
-	fmt.Printf("%50s %d\n", "Roll =", roll)
-}
-
-func (g *Game) printPlayerPosition(player *Player) {
-	fmt.Printf("%45s %s %d\n", player.name, "Position =", player.pos)
+	for i := 0 ; i < size ; i++{
+		for j := 0 ; j < size ; j++{
+			regions[i][j].standOn = regions[i][j].standOn[:0]
+		}
+	}
+	
 }
 
 func (g *Game) resetPlayersInfo(){
+	board := g.board
 	for _, player := range g.players {
-		player.pos = 0
+		player.pos = 1
 		player.win = false 
+		board.AddStandOn(player)
 	}
 }
 
@@ -109,8 +99,8 @@ func (g *Game) resetQueue(){
 }
 
 func (g *Game) resetGame() {
-	fmt.Printf("%65s\n", "All Player is Winning Reset Game!!")
-	fmt.Println("----------------------------------------------------------------------------------------------------------")
+	fmt.Printf("%92s\n", "All Player is Winning Reset Game!!")
+	g.resetBoard()	
 	g.resetPlayersInfo()
 	g.resetQueue()
 }
@@ -119,25 +109,30 @@ func (g *Game) render() {
 	board := g.board
 	size := board.size
 
-	fmt.Println("----------------------------------------------------------------------------------------------------------")
-	
+	g.printBoarder()
+
 	for i := size - 1 ; i >= 0  ; i-- {
 		for j := 0 ; j < size ; j++ {
 			symbols := ""
 			if len(board.regions[i][j].standOn) > 0 {
-				symbols = board.regions[i][j].standOn[len(board.regions[i][j].standOn)-1].name
+
+				names  := []string{}
+				for _, player := range board.regions[i][j].standOn {
+					names = append(names, player.name)
+				}
+				symbols = strings.Join(names, ",")
+				
 			}else{
 				symbols = strings.Join(board.regions[i][j].symbols, ",")
 			}
 
-			fmt.Printf("%18s",symbols)
+			fmt.Printf("%15s",symbols)
 		}
 		
 		fmt.Println()
 	}
 
-
-	fmt.Println("----------------------------------------------------------------------------------------------------------")
+	g.printBoarder()
 
 }
 
@@ -152,11 +147,28 @@ func (g *Game) isWinAll() bool {
 	return winCount == len(g.players) - 1
 }
 
-
-
 func (g *Game) changeTurn() {
 	g.players = append(g.players[1:], g.players[0])
 	for g.players[0].win {
 		g.players = append(g.players[1:], g.players[0])
 	}
+}
+
+
+func (g *Game)printBoarder()	{
+	fmt.Println("-------------------------------------------------------------------------------------------------------------------------------------------------------------")
+}
+
+func (g *Game) printInformation(player *Player) {
+	fmt.Printf("%80s %s\n", "Current Player =", player.name)
+	fmt.Printf("%86s\n", "Press Enter to Roll!!!")
+	fmt.Scanln()
+}
+
+func (g *Game) printRoll(roll int) {
+	fmt.Printf("%77s %d\n", "Roll =", roll)
+}
+
+func (g *Game) printPlayerPosition(player *Player) {
+	fmt.Printf("%70s %s %d\n", player.name, "Position =", player.pos)
 }
