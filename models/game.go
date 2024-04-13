@@ -46,24 +46,27 @@ func (g *Game) Play() {
 	g.render()
 
 	for {
-		curPlayer := g.getCurrentPlayer()
-		g.printInformation(curPlayer)
-
-		roll := curPlayer.RollDice()
-		g.printRoll(roll)
-
-		curPlayer.Move(roll)
-		g.printPlayerPosition(curPlayer)
-
+		g.playRound()
 		if g.isWinAll() {
 			g.resetGame()
 			g.render()
 			continue
 		}
-
 		g.changeTurn()
 		g.render()
 	}
+}
+
+
+func (g *Game) playRound() {
+	curPlayer := g.getCurrentPlayer()
+	g.printInformation(curPlayer)
+	
+	roll := curPlayer.RollDice()
+	g.printRoll(roll)
+
+	curPlayer.Move(roll)
+	g.printPlayerPosition(curPlayer)
 }
 
 func (g *Game) getCurrentPlayer() *Player {

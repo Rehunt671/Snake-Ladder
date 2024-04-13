@@ -56,49 +56,10 @@ func (b *Board) AddStandOn(p *Player)  {
 
 
 func (b *Board) initRegions(){
-	size := b.size
-	
-	b.regions = make([][]*Region, size)
-	for i := range b.regions {
-    b.regions[i] = make([]*Region, size)
-	}
-
-	for i := size - 1 ; i >= 0  ; i-- {
-		num := 0;
-		if i % 2 == 0 {
-			for j := size - 1 ; j >= 0  ; j-- {
-				num = size * i + j + 1
-				b.regions[i][j] = NewRegion([]string{strconv.Itoa(num)})
-			}
-		}else{
-			for j := 0 ; j < size ; j++ {
-				num = size * i + j + 1
-				b.regions[i][size - j - 1] = NewRegion([]string{strconv.Itoa(num)})
-			}
-		}
-	}
-
-	for i, snake := range b.snakes {
-		start := snake.start
-		end := snake.end
-
-		row , col := utils.NumToRowCol(start , size) 
-		b.regions[row][col].symbols = append(b.regions[row][col].symbols,fmt.Sprintf("S%d", i+1) )
-		row , col = utils.NumToRowCol(end , size) 
-		b.regions[row][col].symbols = append(b.regions[row][col].symbols,fmt.Sprintf("s%d", i+1) )
-
-	}
-
-	for i, ladder := range b.ladders {
-		start := ladder.start
-		row , col := utils.NumToRowCol(start , size) 
-		b.regions[row][col].symbols = append(b.regions[row][col].symbols,fmt.Sprintf("L%d", i+1) )
-
-		end := ladder.end
-		row , col = utils.NumToRowCol(end , size) 
-		b.regions[row][col].symbols = append(b.regions[row][col].symbols,fmt.Sprintf("l%d", i+1) )
-	}
-
+	b.createRegionsSlice()
+	b.addNumberSymbol()
+	b.addSnakesSymbol()
+	b.addLadderSymbol()
 }
 
 func (b *Board) initSnakesAndLadders(numSnakes, numLadders, size int, snakeLadderMap *map[string]bool) {
@@ -143,3 +104,53 @@ func (b *Board) isSnake(pos int) (bool, int) {
 	return false, -1
 }
 
+func (b *Board) createRegionsSlice(){
+	b.regions = make([][]*Region, b.size)
+	for i := range b.regions {
+    b.regions[i] = make([]*Region, b.size)
+	}
+}
+
+func (b *Board) addNumberSymbol(){
+	size := b.size
+
+	for i := size - 1 ; i >= 0  ; i-- {
+		num := 0;
+		if i % 2 == 0 {
+			for j := size - 1 ; j >= 0  ; j-- {
+				num = size * i + j + 1
+				b.regions[i][j] = NewRegion([]string{strconv.Itoa(num)})
+			}
+		}else{
+			for j := 0 ; j < size ; j++ {
+				num = size * i + j + 1
+				b.regions[i][size - j - 1] = NewRegion([]string{strconv.Itoa(num)})
+			}
+		}
+	}
+}
+
+func (b *Board) addLadderSymbol(){
+	
+	for i, ladder := range b.ladders {
+		start := ladder.start
+		row , col := utils.NumToRowCol(start , b.size) 
+		b.regions[row][col].symbols = append(b.regions[row][col].symbols,fmt.Sprintf("L%d", i+1) )
+
+		end := ladder.end
+		row , col = utils.NumToRowCol(end , b.size) 
+		b.regions[row][col].symbols = append(b.regions[row][col].symbols,fmt.Sprintf("l%d", i+1) )
+	}
+}
+
+func(b *Board) addSnakesSymbol(){
+	for i, snake := range b.snakes {
+		start := snake.start
+		row , col := utils.NumToRowCol(start , b.size) 
+		b.regions[row][col].symbols = append(b.regions[row][col].symbols,fmt.Sprintf("S%d", i+1) )
+		
+		end := snake.end
+		row , col = utils.NumToRowCol(end , b.size) 
+		b.regions[row][col].symbols = append(b.regions[row][col].symbols,fmt.Sprintf("s%d", i+1) )
+	}
+}
