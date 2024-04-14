@@ -70,12 +70,10 @@ func (g *gameImpl) resetBoard(){
 	board := g.board
 	size := board.GetSize()
 
-	for i := 0 ; i < size ; i++{
-		for j := 0 ; j < size ; j++{
-			region := board.GetRegion(i,j)
-			standOn := region.GetStandOn()
-			region.SetStandOn(standOn[:0])
-		}
+	for i := 0 ; i < size * size ; i++{
+		region := board.GetRegion(i)
+		standOn := region.GetStandOn()
+		region.SetStandOn(standOn[:0])
 	}
 	
 }
@@ -108,29 +106,40 @@ func (g *gameImpl) render() {
 	g.printBorder()
 
 	for i := size - 1 ; i >= 0  ; i-- {
-		for j := 0 ; j < size ; j++ {
-			symbols := ""
-			region := board.GetRegion(i,j)
-			if len(region.GetStandOn()) > 0 {
-
-				names  := []string{}
-				for _, player := range region.GetStandOn() {
-					names = append(names, player.GetName())
-				}
-				symbols = strings.Join(names, ",")
-				
-			}else{
-				symbols = strings.Join(region.GetSymbols(), ",")
+		if i % 2 != 0 {
+			for j := size - 1 ; j >= 0  ; j-- {
+				idx := size*i + j
+				g.printRegion(idx)
 			}
-
-			fmt.Printf("%15s",symbols)
+		}else{
+			for j := 0 ; j < size ; j++ {
+				idx := size*i + j
+				g.printRegion(idx)
+			}
 		}
-		
 		fmt.Println()
 	}
 
 	g.printBorder()
 
+}
+
+func (g *gameImpl) printRegion(idx int ) {
+	board := g.board
+
+	symbols := ""
+	region := board.GetRegion(idx)
+	if len(region.GetStandOn()) > 0 {
+		names := make([]string, len(region.GetStandOn()))
+		for k, player := range region.GetStandOn() {
+			names[k] = player.GetName()
+		}
+		symbols = strings.Join(names, ",")
+	} else {
+		symbols = strings.Join(region.GetSymbols(), ",")
+	}
+
+	fmt.Printf("%15s", symbols)
 }
 
 func (g *gameImpl) isWinAll() bool {
