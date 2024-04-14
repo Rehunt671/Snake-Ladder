@@ -10,14 +10,14 @@ import (
 
 
 type Board interface{
-	SetPosition(p Player , roll int)
+	SetPosition(p Player , pos int)
 	GetSize() int
-	GetPath(int , int ) Path
+	GetRegion(row int , col int ) Region
 }
 
 type boardImpl struct {
 	size    int
-	paths [][]Path
+	regions [][]Region
 	snakes  []Snake
 	ladders []Ladder
 }
@@ -34,23 +34,11 @@ func NewBoard(numSnakes int, numLadders int, size int) Board {
 
 	return b
 }
+
 func (b *boardImpl) SetPosition(p Player , newPos int)  {
-	boardSize := b.size * b.size
-	playerPos := p.GetPos()
 	
-	if newPos > boardSize {
-		gap := newPos - boardSize
-		newPos = boardSize - gap
-	} else {
-		newPos = b.getNewPosition(newPos)
-	}
-
-	row , col := utils.NumToRowCol(playerPos , b.size)
-	b.paths[row][col].RemoveStandOn(p);
-
-	row , col = utils.NumToRowCol(newPos , b.size) 
-	b.paths[row][col].AddStandOn(p);
-
+	newPos = b.getValidPosition(newPos)
+	b.setStanOn(p,newPos)
 	p.SetPos(newPos)
 	if b.isDestination(newPos) {
 		fmt.Printf("%78s\n", "Won!!!")
@@ -63,12 +51,27 @@ func (b *boardImpl) GetSize() int{
 	return b.size
 }
 
-func (b *boardImpl) GetPath(i int , j int) Path{
-	return b.paths[i][j]
+func (b *boardImpl) GetRegion(row int , col int ) Region {
+	return b.regions[row][col]
 }
 
 
-func (b *boardImpl) getNewPosition(pos int) int {
+func (b *boardImpl) setStanOn(p Player  , newPos int){
+	row , col := utils.NumToRowCol(p.GetPos() , b.size)
+	b.regions[row][col].RemoveStandOn(p);
+
+	row , col = utils.NumToRowCol(newPos , b.size) 
+	b.regions[row][col].AddStandOn(p);
+}
+
+func (b *boardImpl) getValidPosition(pos int) int {
+	boardSize := b.size * b.size
+
+	if pos > boardSize {
+		gap := pos - boardSize
+		return boardSize - gap
+	} 
+
 	if ok, val := b.isLadder(pos); ok {
 		fmt.Printf("%82s %d, to: %d\n","Climb ladder!!. Go up from:", pos, val)
 		return val
@@ -142,7 +145,7 @@ func (b *boardImpl) initLadders(numLadders int , size int , snakeLadderMap *map[
 	}
 }
 
-//////////////////Init Regions/////////////
+//////////////////Init Regions///////////// OK 
 func (b *boardImpl) initRegions(){
 	b.createRegionsSlice()
 	b.addNumberSymbol()
@@ -151,9 +154,9 @@ func (b *boardImpl) initRegions(){
 }
 
 func (b *boardImpl) createRegionsSlice(){
-	b.paths = make([][]Path, b.size)
-	for i := range b.paths {
-    b.paths[i] = make([]Path, b.size)
+	b.regions = make([][]Region, b.size)
+	for i := range b.regions {
+    b.regions[i] = make([]Region, b.size)
 	}
 }
 
@@ -165,12 +168,12 @@ func (b *boardImpl) addNumberSymbol(){
 		if i % 2 == 0 {
 			for j := size - 1 ; j >= 0  ; j-- {
 				num = size * i + j + 1
-				b.paths[i][j] = NewPath([]string{strconv.Itoa(num)})
+				b.regions[i][j] = NewRegion([]string{strconv.Itoa(num)})
 			}
 		}else{
 			for j := 0 ; j < size ; j++ {
 				num = size * i + j + 1
-				b.paths[i][size - j - 1] = NewPath([]string{strconv.Itoa(num)})
+				b.regions[i][size - j - 1] = NewRegion([]string{strconv.Itoa(num)})
 			}
 		}
 	}
@@ -182,15 +185,15 @@ func (b *boardImpl) addLadderSymbol(){
 		
 		start := ladder.GetStart()
 		row , col := utils.NumToRowCol(start , b.size)
-		path := b.paths[row][col]
-		newSymbols := append(path.GetSymbols(),fmt.Sprintf("L%d", i+1))
-		path.SetSymbols(newSymbols)
+		region := b.regions[row][col]
+		newSymbols := append(region.GetSymbols(),fmt.Sprintf("L%d", i+1))
+		region.SetSymbols(newSymbols)
 
 		end := ladder.GetEnd()
 		row , col = utils.NumToRowCol(end , b.size) 
-		path = b.paths[row][col]
-		newSymbols = append(path.GetSymbols(),fmt.Sprintf("l%d", i+1))
-		path.SetSymbols(newSymbols)
+		region = b.regions[row][col]
+		newSymbols = append(region.GetSymbols(),fmt.Sprintf("l%d", i+1))
+		region.SetSymbols(newSymbols)
 
 	}
 }
@@ -199,16 +202,16 @@ func(b *boardImpl) addSnakesSymbol(){
 	for i, snake := range b.snakes {
 		start := snake.GetStart()
 		row , col := utils.NumToRowCol(start , b.size)
-		path := b.paths[row][col]
-		newSymbols := append(path.GetSymbols(),fmt.Sprintf("S%d", i+1))
-		path.SetSymbols(newSymbols)
+		region := b.regions[row][col]
+		newSymbols := append(region.GetSymbols(),fmt.Sprintf("S%d", i+1))
+		region.SetSymbols(newSymbols)
 
 		
 		end := snake.GetEnd()
 		row , col = utils.NumToRowCol(end , b.size) 
-		path = b.paths[row][col]
-		newSymbols = append(path.GetSymbols(),fmt.Sprintf("s%d", i+1))
-		path.SetSymbols(newSymbols)
+		region = b.regions[row][col]
+		newSymbols = append(region.GetSymbols(),fmt.Sprintf("s%d", i+1))
+		region.SetSymbols(newSymbols)
 	}
 }
 //////////////////Init Regions/////////////

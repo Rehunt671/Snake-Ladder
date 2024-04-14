@@ -6,9 +6,6 @@ import (
 	"strings"
 )
 
-var gameInstance Game
-
-
 type Game interface {
 	AddPlayer(name string)
 	Play()
@@ -21,24 +18,14 @@ type gameImpl struct {
 	firstPlayer Player
 }
 
-// Don't have Constructor in golang ,So we have to create Global func to setter for struct
 func NewGame(numberOfSnakes int, numberOfLadders int, boardSize int) Game {
-	gameInstance =  &gameImpl{
+	return &gameImpl{
 			dice:    NewDice(6),
 			board:   NewBoard(numberOfSnakes, numberOfLadders, boardSize),
 			players: []Player{},
 	}
-	return gameInstance
 }
 
-func GetGameInstance() Game {
-	if gameInstance == nil {
-		gameInstance = NewGame(1,1,10);
-	}
-  return gameInstance;
-}
-
-//ตัว pointer receiver จะเป็นตัวบอกว่า method นั้นๆจะใช้ได้แค่กับ struct ของ pointer เท่านั้น
 func (g *gameImpl) AddPlayer(name string){
 	player := NewPlayer(name)
 	g.players = append(g.players,player)
@@ -85,9 +72,9 @@ func (g *gameImpl) resetBoard(){
 
 	for i := 0 ; i < size ; i++{
 		for j := 0 ; j < size ; j++{
-			path := board.GetPath(i,j)
-			standOn := path.GetStandOn()
-			path.SetStandOn(standOn[:0])
+			region := board.GetRegion(i,j)
+			standOn := region.GetStandOn()
+			region.SetStandOn(standOn[:0])
 		}
 	}
 	
@@ -108,7 +95,7 @@ func (g *gameImpl) resetQueue(){
 }
 
 func (g *gameImpl) resetGame() {
-	fmt.Printf("%92s\n", "All Player is Winning Reset Game!!")
+	fmt.Printf("%92s\n", "All player are winning Reset Game!!")
 	g.resetBoard()	
 	g.resetPlayersInfo()
 	g.resetQueue()
@@ -118,22 +105,22 @@ func (g *gameImpl) render() {
 	board := g.board
 	size := board.GetSize()
 
-	g.printBoarder()
+	g.printBorder()
 
 	for i := size - 1 ; i >= 0  ; i-- {
 		for j := 0 ; j < size ; j++ {
 			symbols := ""
-			path := board.GetPath(i,j)
-			if len(path.GetStandOn()) > 0 {
+			region := board.GetRegion(i,j)
+			if len(region.GetStandOn()) > 0 {
 
 				names  := []string{}
-				for _, player := range path.GetStandOn() {
+				for _, player := range region.GetStandOn() {
 					names = append(names, player.GetName())
 				}
 				symbols = strings.Join(names, ",")
 				
 			}else{
-				symbols = strings.Join(path.GetSymbols(), ",")
+				symbols = strings.Join(region.GetSymbols(), ",")
 			}
 
 			fmt.Printf("%15s",symbols)
@@ -142,7 +129,7 @@ func (g *gameImpl) render() {
 		fmt.Println()
 	}
 
-	g.printBoarder()
+	g.printBorder()
 
 }
 
@@ -165,7 +152,7 @@ func (g *gameImpl) changeTurn() {
 }
 
 
-func (g *gameImpl)printBoarder()	{
+func (g *gameImpl)printBorder()	{
 	fmt.Println("-------------------------------------------------------------------------------------------------------------------------------------------------------------")
 }
 

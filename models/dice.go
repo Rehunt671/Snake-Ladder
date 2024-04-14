@@ -18,5 +18,5 @@ func NewDice(max int) Dice {
 }
 
 func (d *diceImpl) Roll() int {
-	return rand.Intn(d.max)
-}
+	return rand.Intn(d.max) + 1
+} 
