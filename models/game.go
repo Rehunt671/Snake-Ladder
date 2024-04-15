@@ -71,9 +71,9 @@ func (g *gameImpl) resetBoard(){
 	size := board.GetSize()
 
 	for i := 0 ; i < size * size ; i++{
-		region := board.GetRegion(i)
-		standOn := region.GetStandOn()
-		region.SetStandOn(standOn[:0])
+		cell := board.GetCell(i)
+		standOn := cell.GetStandOn()
+		cell.SetStandOn(standOn[:0])
 	}
 	
 }
@@ -128,15 +128,15 @@ func (g *gameImpl) printRegion(idx int ) {
 	board := g.board
 
 	symbols := ""
-	region := board.GetRegion(idx)
-	if len(region.GetStandOn()) > 0 {
-		names := make([]string, len(region.GetStandOn()))
-		for k, player := range region.GetStandOn() {
+	cell := board.GetCell(idx)
+	if len(cell.GetStandOn()) > 0 {
+		names := make([]string, len(cell.GetStandOn()))
+		for k, player := range cell.GetStandOn() {
 			names[k] = player.GetName()
 		}
 		symbols = strings.Join(names, ",")
 	} else {
-		symbols = strings.Join(region.GetSymbols(), ",")
+		symbols = strings.Join(cell.GetSymbols(), ",")
 	}
 
 	fmt.Printf("%15s", symbols)

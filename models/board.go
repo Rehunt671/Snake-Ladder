@@ -10,12 +10,12 @@ import (
 type Board interface{
 	SetPosition(p Player , pos int)
 	GetSize() int
-	GetRegion(idx int) Region
+	GetCell(idx int) Cell
 }
 
 type boardImpl struct {
 	size    int
-	regions []Region
+	cells []Cell
 	snakes  []Snake
 	ladders []Ladder
 }
@@ -49,15 +49,15 @@ func (b *boardImpl) GetSize() int{
 	return b.size
 }
 
-func (b *boardImpl) GetRegion(idx int ) Region {
-	return b.regions[idx]
+func (b *boardImpl) GetCell(idx int ) Cell {
+	return b.cells[idx]
 }
 
 
 func (b *boardImpl) setStanOn(p Player  , newPos int){
-	b.regions[p.GetPos()-1].RemoveStandOn(p);
+	b.cells[p.GetPos()-1].RemoveStandOn(p);
 
-	b.regions[newPos - 1].AddStandOn(p);
+	b.cells[newPos - 1].AddStandOn(p);
 }
 
 func (b *boardImpl) getValidPosition(pos int) int {
@@ -143,21 +143,17 @@ func (b *boardImpl) initLadders(numLadders int , size int , snakeLadderMap *map[
 
 //////////////////Init Regions///////////// OK 
 func (b *boardImpl) initRegions(){
-	b.createRegionsSlice()
 	b.addNumberSymbol()
 	b.addSnakesSymbol()
 	b.addLadderSymbol()
-}
-
-func (b *boardImpl) createRegionsSlice(){
-	b.regions = make([]Region, b.size * b.size)
 }
 
 func (b *boardImpl) addNumberSymbol(){
 	size := b.size
 
 	for i := 0 ; i < size * size ; i++{
-		b.regions[i] = NewRegion([]string{strconv.Itoa(i+1)})
+		cell := NewCell([]string{strconv.Itoa(i+1)})
+		b.cells = append(b.cells, cell) 
 	}
 	
 }
@@ -167,14 +163,14 @@ func (b *boardImpl) addLadderSymbol(){
 	for i, ladder := range b.ladders {
 		
 		start := ladder.GetStart()
-		region := b.regions[start - 1]
-		newSymbols := append(region.GetSymbols(),fmt.Sprintf("L%d", i+1))
-		region.SetSymbols(newSymbols)
+		cell := b.cells[start - 1]
+		newSymbols := append(cell.GetSymbols(),fmt.Sprintf("L%d", i+1))
+		cell.SetSymbols(newSymbols)
 
 		end := ladder.GetEnd()
-		region = b.regions[end - 1]
-		newSymbols = append(region.GetSymbols(),fmt.Sprintf("l%d", i+1))
-		region.SetSymbols(newSymbols)
+		cell = b.cells[end - 1]
+		newSymbols = append(cell.GetSymbols(),fmt.Sprintf("l%d", i+1))
+		cell.SetSymbols(newSymbols)
 
 	}
 }
@@ -182,15 +178,15 @@ func (b *boardImpl) addLadderSymbol(){
 func(b *boardImpl) addSnakesSymbol(){
 	for i, snake := range b.snakes {
 		start := snake.GetStart()
-		region := b.regions[start - 1]
-		newSymbols := append(region.GetSymbols(),fmt.Sprintf("S%d", i+1))
-		region.SetSymbols(newSymbols)
+		cell := b.cells[start - 1]
+		newSymbols := append(cell.GetSymbols(),fmt.Sprintf("S%d", i+1))
+		cell.SetSymbols(newSymbols)
 
 		
 		end := snake.GetEnd()
-		region = b.regions[end - 1]
-		newSymbols = append(region.GetSymbols(),fmt.Sprintf("s%d", i+1))
-		region.SetSymbols(newSymbols)
+		cell = b.cells[end - 1]
+		newSymbols = append(cell.GetSymbols(),fmt.Sprintf("s%d", i+1))
+		cell.SetSymbols(newSymbols)
 	}
 }
 //////////////////Init Regions/////////////
