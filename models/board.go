@@ -8,14 +8,15 @@ import (
 
 
 type Board interface{
-	SetPosition(p Player , pos int)
+	SetPosition(p Player , pos int) int
+	IsDestination(pos int) bool
 	GetSize() int
 	GetCell(idx int) Cell
 }
 
 type boardImpl struct {
 	size    int
-	cells []Cell
+	cells 	[]Cell
 	snakes  []Snake
 	ladders []Ladder
 }
@@ -33,16 +34,13 @@ func NewBoard(numSnakes int, numLadders int, size int) Board {
 	return b
 }
 
-func (b *boardImpl) SetPosition(p Player , newPos int)  {
+func (b *boardImpl) SetPosition(p Player , newPos int) int {
 	
 	newPos = b.getValidPosition(newPos)
 	b.setStanOn(p,newPos)
 	p.SetPos(newPos)
-	if b.isDestination(newPos) {
-		fmt.Printf("%78s\n", "Won!!!")
-		p.SetWin(true)
-	}
-
+	
+	return newPos
 }
 
 func (b *boardImpl) GetSize() int{
@@ -99,7 +97,7 @@ func (b *boardImpl) isSnake(pos int) (bool, int) {
 	return false, -1
 }
 
-func (b *boardImpl) isDestination(pos int) bool {
+func (b *boardImpl) IsDestination(pos int) bool {
 	return pos == b.size*b.size
 }
 

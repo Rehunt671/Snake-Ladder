@@ -36,18 +36,17 @@ func (g *gameImpl) AddPlayer(name string){
 }
 
 func (g *gameImpl) Play() {
-	g.render()
 
 	for {
+		g.render()
 		g.playRound()
 		if g.isWinAll() {
 			g.resetGame()
-			g.render()
 			continue
 		}
 		g.changeTurn()
-		g.render()
 	}
+
 }
 
 
@@ -58,8 +57,14 @@ func (g *gameImpl) playRound() {
 	roll := g.dice.Roll()
 	g.printRoll(roll)
 
-	g.board.SetPosition(curPlayer , curPlayer.GetPos() + roll)
+	newPos := g.board.SetPosition(curPlayer , curPlayer.GetPos() + roll)
 	g.printPlayerPosition(curPlayer)
+
+	if g.board.IsDestination(newPos) {
+		g.printWin()
+		curPlayer.SetWin(true)
+	}
+
 }
 
 func (g *gameImpl) getCurrentPlayer() Player {
@@ -131,8 +136,8 @@ func (g *gameImpl) printRegion(idx int ) {
 	cell := board.GetCell(idx)
 	if len(cell.GetStandOn()) > 0 {
 		names := make([]string, len(cell.GetStandOn()))
-		for k, player := range cell.GetStandOn() {
-			names[k] = player.GetName()
+		for i, player := range cell.GetStandOn() {
+			names[i] = player.GetName()
 		}
 		symbols = strings.Join(names, ",")
 	} else {
@@ -161,7 +166,7 @@ func (g *gameImpl) changeTurn() {
 }
 
 
-func (g *gameImpl)printBorder()	{
+func (g *gameImpl) printBorder()	{
 	fmt.Println("-------------------------------------------------------------------------------------------------------------------------------------------------------------")
 }
 
@@ -177,4 +182,10 @@ func (g *gameImpl) printRoll(roll int) {
 
 func (g *gameImpl) printPlayerPosition(p Player) {
 	fmt.Printf("%70s %s %d\n", p.GetName(), "Position =", p.GetPos())
+}
+
+func (g *gameImpl) printWin(){
+
+	fmt.Printf("%78s\n", "Won!!!")
+
 }
