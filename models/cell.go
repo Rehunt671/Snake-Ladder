@@ -1,19 +1,20 @@
 package models
 
 type Cell interface {
-	AddPlayerStandingOn(p Player)
-	RemovePlayerStandingOn(p Player)
-	RecievePlayersStandingOn() []Player
-	SetPlayersStandingOn([]Player)
+	AddPlayer(p Player)
+	RemovePlayer(p Player)
+	GetPlayers() []Player
+	SetPlayers([]Player)
+	HasPlayer() bool
 	GetSymbols() []string
 	SetSymbols([]string)
 }
 
 // TODO:
-// 1.Change GetStandOn function name to RecievePlayersStandingOn
-// 2.Change SetStandOn function name to SetPlayersStandingOn
-// 3.Change RemoveStandOn function name to RemovePlayerStandingOn
-// 4.Change AddStandOn function name to AddPlayerStandingOn
+// 1.Change GetStandOn function name to GetPlayers
+// 2.Change SetStandOn function name to SetPlayers
+// 3.Change RemoveStandOn function name to RemovePlayer
+// 4.Change AddStandOn function name to AddPlayer
 type cellImpl struct {
 	symbols           []string
 	playersStandingOn []Player
@@ -25,11 +26,11 @@ func NewCell(symbols []string) Cell {
 	}
 }
 
-func (c *cellImpl) AddPlayerStandingOn(p Player) {
+func (c *cellImpl) AddPlayer(p Player) {
 	c.playersStandingOn = append(c.playersStandingOn, p)
 }
 
-func (c *cellImpl) RemovePlayerStandingOn(p Player) {
+func (c *cellImpl) RemovePlayer(p Player) {
 
 	for i, player := range c.playersStandingOn {
 		if player == p {
@@ -38,7 +39,10 @@ func (c *cellImpl) RemovePlayerStandingOn(p Player) {
 		}
 	}
 }
-func (c *cellImpl) RecievePlayersStandingOn() []Player    { return c.playersStandingOn }
-func (c *cellImpl) SetPlayersStandingOn(players []Player) { c.playersStandingOn = players }
-func (c *cellImpl) GetSymbols() []string                  { return c.symbols }
-func (c *cellImpl) SetSymbols(symbols []string)           { c.symbols = symbols }
+func (c *cellImpl) GetPlayers() []Player        { return c.playersStandingOn }
+func (c *cellImpl) SetPlayers(players []Player) { c.playersStandingOn = players }
+func (c *cellImpl) GetSymbols() []string        { return c.symbols }
+func (c *cellImpl) SetSymbols(symbols []string) { c.symbols = symbols }
+func (c *cellImpl) HasPlayer() bool {
+	return len(c.playersStandingOn) != 0
+}

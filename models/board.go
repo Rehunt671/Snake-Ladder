@@ -27,7 +27,7 @@ func NewBoard(numSnakes int, numLadders int, size int) Board {
 	snakeLadderMap := make(map[string]bool)
 	b.initSnakes(numLadders, size, &snakeLadderMap)
 	b.initLadders(numLadders, size, &snakeLadderMap)
-	b.initRegions()
+	b.initCells()
 	return b
 }
 
@@ -51,8 +51,8 @@ func (b *boardImpl) GetCell(idx int) Cell {
 }
 
 func (b *boardImpl) setStanOn(p Player, newPos int) {
-	b.cells[p.GetPos()-1].RemovePlayerStandingOn(p)
-	b.cells[newPos-1].AddPlayerStandingOn(p)
+	b.cells[p.GetPos()-1].RemovePlayer(p)
+	b.cells[newPos-1].AddPlayer(p)
 }
 
 func (b *boardImpl) getValidPosition(pos int) int {
@@ -134,7 +134,7 @@ func (b *boardImpl) initLadders(numLadders int, size int, snakeLadderMap *map[st
 	}
 }
 
-func (b *boardImpl) initRegions() {
+func (b *boardImpl) initCells() {
 	b.addNumberSymbol()
 	b.addSnakesSymbol()
 	b.addLadderSymbol()

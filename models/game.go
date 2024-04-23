@@ -3,6 +3,8 @@ package models
 import (
 	"fmt"
 	"strings"
+
+	"github.com/samber/lo"
 )
 
 // TODO:
@@ -75,8 +77,8 @@ func (g *gameImpl) resetBoard() {
 
 	for i := 0; i < boardSize; i++ {
 		cell := board.GetCell(i)
-		playersOnCell := cell.RecievePlayersStandingOn()
-		cell.SetPlayersStandingOn(playersOnCell[:0])
+		playersOnCell := cell.GetPlayers()
+		cell.SetPlayers(playersOnCell[:0])
 	}
 }
 
@@ -127,19 +129,23 @@ func (g *gameImpl) printRegion(idx int) {
 	board := g.board
 	symbols := ""
 	cell := board.GetCell(idx)
-	playersOnCell := cell.RecievePlayersStandingOn()
+	playersOnCell := cell.GetPlayers()
 
-	if len(playersOnCell) > 0 {
-		names := make([]string, len(playersOnCell))
-		for i, player := range playersOnCell {
-			names[i] = player.GetName()
-		}
+	if cell.HasPlayer() {
+		names := g.getPlayersName(playersOnCell)
 		symbols = strings.Join(names, ",")
 	} else {
 		symbols = strings.Join(cell.GetSymbols(), ",")
 	}
 
 	fmt.Printf("%15s", symbols)
+}
+
+func (g *gameImpl) getPlayersName(players []Player) []string {
+	names := lo.Map(players, func(player Player, idx int) string {
+		return player.GetName()
+	})
+	return names
 }
 
 func (g *gameImpl) isGameEnd() bool {
