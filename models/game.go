@@ -1,11 +1,14 @@
 package models
 
-//package is a collection of source files in the same directory that are compiled together
 import (
 	"fmt"
 	"strings"
 )
 
+// TODO:
+// 1. Change changeTurn algorithm
+// 2. Change isWinAll function name => isGameEnd
+// 3. Make render function more readable
 type Game interface {
 	AddPlayer(name string)
 	Play()
@@ -72,8 +75,9 @@ func (g *gameImpl) getCurrentPlayer() Player {
 func (g *gameImpl) resetBoard() {
 	board := g.board
 	size := board.GetSize()
+	boardSize := size * size
 
-	for i := 0; i < size*size; i++ {
+	for i := 0; i < boardSize; i++ {
 		cell := board.GetCell(i)
 		standOn := cell.GetStandOn()
 		cell.SetStandOn(standOn[:0])

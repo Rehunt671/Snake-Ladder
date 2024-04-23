@@ -8,6 +8,9 @@ type Player interface {
 	GetWin() bool
 }
 
+// TODO:
+// 1. Change SetWin function name to SetIsWin
+// 2. Change GetWin function name to GetIsWin
 type playerImpl struct {
 	name string
 	pos  int
