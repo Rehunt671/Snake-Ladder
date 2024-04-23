@@ -20,6 +20,7 @@ func NewSnake(start int, end int) Snake {
 func (s *snakeImpl) GetStart() int {
 	return s.start
 }
+
 func (s *snakeImpl) GetEnd() int {
 	return s.end
 }

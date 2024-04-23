@@ -25,6 +25,7 @@ func (c *cellImpl) AddStandOn(p Player) {
 }
 
 func (c *cellImpl) RemoveStandOn(p Player) {
+
 	for i, player := range c.standOn {
 		if player == p {
 			c.standOn = append(c.standOn[:i], c.standOn[i+1:]...)
