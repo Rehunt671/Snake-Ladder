@@ -83,6 +83,7 @@ func (b *boardImpl) isLadder(pos int) (bool, int) {
 			return true, val.GetEnd()
 		}
 	}
+
 	return false, -1
 }
 
@@ -93,6 +94,7 @@ func (b *boardImpl) isSnake(pos int) (bool, int) {
 			return true, val.GetEnd()
 		}
 	}
+
 	return false, -1
 }
 
@@ -165,6 +167,7 @@ func (b *boardImpl) addLadderSymbol() {
 }
 
 func (b *boardImpl) addSnakesSymbol() {
+
 	for i, snake := range b.snakes {
 		start := snake.GetStart()
 		cell := b.cells[start-1]

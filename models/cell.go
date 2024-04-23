@@ -39,10 +39,23 @@ func (c *cellImpl) RemovePlayer(p Player) {
 		}
 	}
 }
-func (c *cellImpl) GetPlayers() []Player        { return c.playersStandingOn }
-func (c *cellImpl) SetPlayers(players []Player) { c.playersStandingOn = players }
-func (c *cellImpl) GetSymbols() []string        { return c.symbols }
-func (c *cellImpl) SetSymbols(symbols []string) { c.symbols = symbols }
+
+func (c *cellImpl) GetPlayers() []Player {
+	return c.playersStandingOn
+}
+
+func (c *cellImpl) SetPlayers(players []Player) {
+	c.playersStandingOn = players
+}
+
+func (c *cellImpl) GetSymbols() []string {
+	return c.symbols
+}
+
+func (c *cellImpl) SetSymbols(symbols []string) {
+	c.symbols = symbols
+}
+
 func (c *cellImpl) HasPlayer() bool {
 	return len(c.playersStandingOn) != 0
 }
