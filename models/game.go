@@ -15,10 +15,10 @@ type Game interface {
 }
 
 type gameImpl struct {
-	dice        Dice
-	board       Board
-	players     []Player
-	firstPlayer Player
+	dice    Dice
+	board   Board
+	players []Player
+	turnIdx int
 }
 
 func NewGame(numberOfSnakes int, numberOfLadders int, boardSize int) Game {
@@ -33,10 +33,6 @@ func (g *gameImpl) AddPlayer(name string) {
 	player := NewPlayer(name)
 	g.players = append(g.players, player)
 	g.board.SetPosition(player, 1)
-
-	if len(g.players) == 1 {
-		g.firstPlayer = g.players[0]
-	}
 }
 
 func (g *gameImpl) Play() {
@@ -44,7 +40,7 @@ func (g *gameImpl) Play() {
 	for {
 		g.render()
 		g.playRound()
-		if g.isWinAll() {
+		if g.isGameEnd() {
 			g.resetGame()
 			continue
 		}
@@ -64,12 +60,12 @@ func (g *gameImpl) playRound() {
 
 	if g.board.IsDestination(newPos) {
 		g.printWin()
-		curPlayer.SetWin(true)
+		curPlayer.SetIsWin(true)
 	}
 }
 
 func (g *gameImpl) getCurrentPlayer() Player {
-	return g.players[0]
+	return g.players[g.turnIdx]
 }
 
 func (g *gameImpl) resetBoard() {
@@ -79,8 +75,8 @@ func (g *gameImpl) resetBoard() {
 
 	for i := 0; i < boardSize; i++ {
 		cell := board.GetCell(i)
-		standOn := cell.GetStandOn()
-		cell.SetStandOn(standOn[:0])
+		players := cell.RecievePlayersStandingOn()
+		cell.SetPlayersStandingOn(players[:0])
 	}
 }
 
@@ -89,15 +85,12 @@ func (g *gameImpl) resetPlayersInfo() {
 
 	for _, player := range g.players {
 		board.SetPosition(player, 1)
-		player.SetWin(false)
+		player.SetIsWin(false)
 	}
 }
 
 func (g *gameImpl) resetQueue() {
-
-	for g.players[0] != g.firstPlayer {
-		g.players = append(g.players[1:], g.players[0])
-	}
+	g.turnIdx = 0
 }
 
 func (g *gameImpl) resetGame() {
@@ -135,9 +128,9 @@ func (g *gameImpl) printRegion(idx int) {
 	symbols := ""
 	cell := board.GetCell(idx)
 
-	if len(cell.GetStandOn()) > 0 {
-		names := make([]string, len(cell.GetStandOn()))
-		for i, player := range cell.GetStandOn() {
+	if len(cell.RecievePlayersStandingOn()) > 0 {
+		names := make([]string, len(cell.RecievePlayersStandingOn()))
+		for i, player := range cell.RecievePlayersStandingOn() {
 			names[i] = player.GetName()
 		}
 		symbols = strings.Join(names, ",")
@@ -148,11 +141,11 @@ func (g *gameImpl) printRegion(idx int) {
 	fmt.Printf("%15s", symbols)
 }
 
-func (g *gameImpl) isWinAll() bool {
+func (g *gameImpl) isGameEnd() bool {
 	winCount := 0
 
 	for _, player := range g.players {
-		if player.GetWin() {
+		if player.GetIsWin() {
 			winCount++
 		}
 	}
@@ -161,11 +154,16 @@ func (g *gameImpl) isWinAll() bool {
 }
 
 func (g *gameImpl) changeTurn() {
-	g.players = append(g.players[1:], g.players[0])
-
-	for g.players[0].GetWin() {
-		g.players = append(g.players[1:], g.players[0])
+	g.changeTurnIdx()
+	curPlayer := g.getCurrentPlayer()
+	for curPlayer.GetIsWin() {
+		g.changeTurnIdx()
+		curPlayer = g.getCurrentPlayer()
 	}
+}
+
+func (g *gameImpl) changeTurnIdx() {
+	g.turnIdx = (g.turnIdx + 1) % len(g.players)
 }
 
 func (g *gameImpl) printBorder() {

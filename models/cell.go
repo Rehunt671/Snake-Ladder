@@ -1,10 +1,10 @@
 package models
 
 type Cell interface {
-	AddStandOn(p Player)
-	RemoveStandOn(p Player)
-	GetStandOn() []Player
-	SetStandOn([]Player)
+	AddPlayerStandingOn(p Player)
+	RemovePlayerStandingOn(p Player)
+	RecievePlayersStandingOn() []Player
+	SetPlayersStandingOn([]Player)
 	GetSymbols() []string
 	SetSymbols([]string)
 }
@@ -15,8 +15,8 @@ type Cell interface {
 // 3.Change RemoveStandOn function name to RemovePlayerStandingOn
 // 4.Change AddStandOn function name to AddPlayerStandingOn
 type cellImpl struct {
-	symbols []string
-	standOn []Player
+	symbols           []string
+	playersStandingOn []Player
 }
 
 func NewCell(symbols []string) Cell {
@@ -25,20 +25,20 @@ func NewCell(symbols []string) Cell {
 	}
 }
 
-func (c *cellImpl) AddStandOn(p Player) {
-	c.standOn = append(c.standOn, p)
+func (c *cellImpl) AddPlayerStandingOn(p Player) {
+	c.playersStandingOn = append(c.playersStandingOn, p)
 }
 
-func (c *cellImpl) RemoveStandOn(p Player) {
+func (c *cellImpl) RemovePlayerStandingOn(p Player) {
 
-	for i, player := range c.standOn {
+	for i, player := range c.playersStandingOn {
 		if player == p {
-			c.standOn = append(c.standOn[:i], c.standOn[i+1:]...)
+			c.playersStandingOn = append(c.playersStandingOn[:i], c.playersStandingOn[i+1:]...)
 			return
 		}
 	}
 }
-func (c *cellImpl) GetStandOn() []Player        { return c.standOn }
-func (c *cellImpl) SetStandOn(players []Player) { c.standOn = players }
-func (c *cellImpl) GetSymbols() []string        { return c.symbols }
-func (c *cellImpl) SetSymbols(symbols []string) { c.symbols = symbols }
+func (c *cellImpl) RecievePlayersStandingOn() []Player    { return c.playersStandingOn }
+func (c *cellImpl) SetPlayersStandingOn(players []Player) { c.playersStandingOn = players }
+func (c *cellImpl) GetSymbols() []string                  { return c.symbols }
+func (c *cellImpl) SetSymbols(symbols []string)           { c.symbols = symbols }

@@ -51,8 +51,8 @@ func (b *boardImpl) GetCell(idx int) Cell {
 }
 
 func (b *boardImpl) setStanOn(p Player, newPos int) {
-	b.cells[p.GetPos()-1].RemoveStandOn(p)
-	b.cells[newPos-1].AddStandOn(p)
+	b.cells[p.GetPos()-1].RemovePlayerStandingOn(p)
+	b.cells[newPos-1].AddPlayerStandingOn(p)
 }
 
 func (b *boardImpl) getValidPosition(pos int) int {

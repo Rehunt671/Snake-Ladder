@@ -4,13 +4,13 @@ type Player interface {
 	GetName() string
 	GetPos() int
 	SetPos(int)
-	SetWin(bool)
-	GetWin() bool
+	SetIsWin(bool)
+	GetIsWin() bool
 }
 
 // TODO:
-// 1. Change SetWin function name to SetIsWin
-// 2. Change GetWin function name to GetIsWin
+// 1. Change SetIsWin function name to SetIsWin
+// 2. Change GetIsWin function name to GetIsWin
 type playerImpl struct {
 	name string
 	pos  int
@@ -36,10 +36,10 @@ func (p *playerImpl) SetPos(newPos int) {
 	p.pos = newPos
 }
 
-func (p *playerImpl) SetWin(isWin bool) {
+func (p *playerImpl) SetIsWin(isWin bool) {
 	p.isWin = isWin
 }
 
-func (p *playerImpl) GetWin() bool {
+func (p *playerImpl) GetIsWin() bool {
 	return p.isWin
 }
