@@ -7,10 +7,11 @@ import (
 )
 
 type Board interface {
-	SetPosition(p Player, pos int) int
-	IsDestination(pos int) bool
+	IsDestination(position int) bool
 	GetSize() int
-	GetCell(idx int) Cell
+	GetCell(index int) Cell
+	GetLadders() []Ladder
+	GetSnakes() []Snake
 }
 
 type boardImpl struct {
@@ -20,118 +21,69 @@ type boardImpl struct {
 	ladders []Ladder
 }
 
-func NewBoard(numSnakes int, numLadders int, size int) Board {
-	b := &boardImpl{
+func NewBoard(snakeNumber int, ladderNumber int, size int) Board {
+	// FINISH: 2) b => board
+	board := &boardImpl{
 		size: size,
 	}
-	snakeLadderMap := make(map[string]bool)
-	b.initSnakes(numLadders, size, &snakeLadderMap)
-	b.initLadders(numLadders, size, &snakeLadderMap)
-	b.initCells()
-	return b
+	snakeLadderMap := make(map[int]int)
+	// FINISH: 2) ladderNumber => snakeNumber
+	board.initSnakes(snakeNumber, size, &snakeLadderMap)
+	board.initLadders(ladderNumber, size, &snakeLadderMap)
+	board.initCells()
+	return board
 }
 
-func (b *boardImpl) SetPosition(p Player, newPos int) int {
-	newPos = b.getValidPosition(newPos)
-	b.setStanOn(p, newPos)
-	p.SetPos(newPos)
-	return newPos
-}
-
-func (b *boardImpl) IsDestination(pos int) bool {
-	return pos == b.size*b.size
+func (b *boardImpl) IsDestination(position int) bool {
+	return position == b.size*b.size
 }
 
 func (b *boardImpl) GetSize() int {
 	return b.size
 }
 
-func (b *boardImpl) GetCell(idx int) Cell {
-	return b.cells[idx]
+func (b *boardImpl) GetCell(index int) Cell {
+	return b.cells[index]
 }
 
-func (b *boardImpl) setStanOn(p Player, newPos int) {
-	b.cells[p.GetPos()-1].RemovePlayer(p)
-	b.cells[newPos-1].AddPlayer(p)
+func (b *boardImpl) GetLadders() []Ladder {
+	return b.ladders
 }
 
-func (b *boardImpl) getValidPosition(pos int) int {
-	boardSize := b.size * b.size
-
-	if pos > boardSize {
-		gap := pos - boardSize
-		return boardSize - gap
-	}
-
-	if ok, val := b.isLadder(pos); ok {
-		fmt.Printf("%82s %d, to: %d\n", "Climb ladder!!. Go up from:", pos, val)
-		return val
-	}
-
-	if ok, val := b.isSnake(pos); ok {
-		fmt.Printf("%88s %d, to: %d\n", "Oops got bitten by snake!!!. Down from:", pos, val)
-		return val
-	}
-
-	return pos
+func (b *boardImpl) GetSnakes() []Snake {
+	return b.snakes
 }
 
-func (b *boardImpl) isLadder(pos int) (bool, int) {
-
-	for _, val := range b.ladders {
-		if val.GetStart() == pos {
-			return true, val.GetEnd()
-		}
-	}
-
-	return false, -1
-}
-
-func (b *boardImpl) isSnake(pos int) (bool, int) {
-
-	for _, val := range b.snakes {
-		if val.GetStart() == pos {
-			return true, val.GetEnd()
-		}
-	}
-
-	return false, -1
-}
-
-func (b *boardImpl) initSnakes(numSnakes int, size int, snakeLadderMap *map[string]bool) {
+func (b *boardImpl) initSnakes(snakeNumber int, size int, snakeLadderMap *map[int]int) {
 	boardSize := size * size
 
-	for i := 0; i < int(numSnakes); i++ {
+	for i := 0; i < snakeNumber; i++ {
 		for {
 			start := rand.Intn(boardSize) + 1
 			end := rand.Intn(boardSize) + 1
-			if end >= start || start == size {
+			if end >= start || start == boardSize || (*snakeLadderMap)[start] > 0 {
 				continue
 			}
-			if _, ok := (*snakeLadderMap)[fmt.Sprintf("%d:%d", start, end)]; !ok {
-				b.snakes = append(b.snakes, NewSnake(start, end))
-				(*snakeLadderMap)[fmt.Sprintf("%d:%d", start, end)] = true
-				break
-			}
+			b.snakes = append(b.snakes, NewSnake(start, end))
+			(*snakeLadderMap)[start] = end
+			break
 		}
 	}
 }
 
-func (b *boardImpl) initLadders(numLadders int, size int, snakeLadderMap *map[string]bool) {
+func (b *boardImpl) initLadders(ladderNumber int, size int, snakeLadderMap *map[int]int) {
 	boardSize := size * size
 
-	for i := 0; i < int(numLadders); i++ {
+	for i := 0; i < ladderNumber; i++ {
 		for {
 			start := rand.Intn(boardSize) + 1
 			end := rand.Intn(boardSize) + 1
-			if start >= end || start == 1 {
+			if start >= end || start == 1 || (*snakeLadderMap)[start] > 0 {
 				continue
 			}
-			if _, ok := (*snakeLadderMap)[fmt.Sprintf("%d:%d", start, end)]; !ok {
-				b.ladders = append(b.ladders, NewLadder(start, end))
-				(*snakeLadderMap)[fmt.Sprintf("%d:%d", start, end)] = true
-				break
-			}
+			b.ladders = append(b.ladders, NewLadder(start, end))
+			(*snakeLadderMap)[start] = end
+			break
 		}
 	}
 }
@@ -152,7 +104,6 @@ func (b *boardImpl) addNumberSymbol() {
 }
 
 func (b *boardImpl) addLadderSymbol() {
-
 	for i, ladder := range b.ladders {
 		start := ladder.GetStart()
 		cell := b.cells[start-1]
@@ -167,7 +118,6 @@ func (b *boardImpl) addLadderSymbol() {
 }
 
 func (b *boardImpl) addSnakesSymbol() {
-
 	for i, snake := range b.snakes {
 		start := snake.GetStart()
 		cell := b.cells[start-1]

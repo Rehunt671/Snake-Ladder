@@ -1,16 +1,16 @@
 package models
 
 type Cell interface {
-	AddPlayer(p Player)
-	RemovePlayer(p Player)
+	AddPlayer(player Player)
+	RemovePlayer(player Player)
 	GetPlayers() []Player
 	SetPlayers([]Player)
 	HasPlayer() bool
 	GetSymbols() []string
-	SetSymbols([]string)
+	SetSymbols(symbols []string)
 }
 
-// TODO:
+// FINISH:
 // 1.Change GetStandOn function name to GetPlayers
 // 2.Change SetStandOn function name to SetPlayers
 // 3.Change RemoveStandOn function name to RemovePlayer
@@ -26,14 +26,13 @@ func NewCell(symbols []string) Cell {
 	}
 }
 
-func (c *cellImpl) AddPlayer(p Player) {
-	c.playersStandingOn = append(c.playersStandingOn, p)
+func (c *cellImpl) AddPlayer(player Player) {
+	c.playersStandingOn = append(c.playersStandingOn, player)
 }
 
-func (c *cellImpl) RemovePlayer(p Player) {
-
-	for i, player := range c.playersStandingOn {
-		if player == p {
+func (c *cellImpl) RemovePlayer(player Player) {
+	for i, playerOnCell := range c.playersStandingOn {
+		if playerOnCell == player {
 			c.playersStandingOn = append(c.playersStandingOn[:i], c.playersStandingOn[i+1:]...)
 			return
 		}
