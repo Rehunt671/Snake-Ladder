@@ -22,12 +22,10 @@ type boardImpl struct {
 }
 
 func NewBoard(snakeNumber int, ladderNumber int, size int) Board {
-	// FINISH: 2) b => board
 	board := &boardImpl{
 		size: size,
 	}
 	snakeLadderMap := make(map[int]int)
-	// FINISH: 2) ladderNumber => snakeNumber
 	board.initSnakes(snakeNumber, size, &snakeLadderMap)
 	board.initLadders(ladderNumber, size, &snakeLadderMap)
 	board.initCells()

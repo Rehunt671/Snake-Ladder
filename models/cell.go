@@ -10,11 +10,6 @@ type Cell interface {
 	SetSymbols(symbols []string)
 }
 
-// FINISH:
-// 1.Change GetStandOn function name to GetPlayers
-// 2.Change SetStandOn function name to SetPlayers
-// 3.Change RemoveStandOn function name to RemovePlayer
-// 4.Change AddStandOn function name to AddPlayer
 type cellImpl struct {
 	symbols           []string
 	playersStandingOn []Player

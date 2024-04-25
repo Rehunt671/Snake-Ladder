@@ -8,16 +8,11 @@ import (
 	"github.com/snake-ladder/constants"
 )
 
-// FINISH:
-// 1. Change changeTurn algorithm
-// 2. Change isWinAll function name => isGameEnd
-// 3. Make 	 printRegion function more readable
 type Game interface {
 	AddPlayer(name string)
 	Play()
 }
 
-// FINISH: 2) turnIdx => turnIndex
 type gameImpl struct {
 	dice      Dice
 	board     Board
@@ -69,7 +64,6 @@ func (g *gameImpl) playRound() {
 	}
 }
 
-// FINISH: 2) move this func to game model
 func (g *gameImpl) setPosition(p Player, newPos int) int {
 	newPos = g.getValidPosition(newPos)
 	g.setStanOn(p, newPos)
@@ -158,7 +152,7 @@ func (g *gameImpl) resetQueue() {
 }
 
 func (g *gameImpl) resetGame() {
-	fmt.Printf("%92s\n", "All player are winning Reset Game!!")
+	g.printGameEnd()
 	g.resetBoard()
 	g.resetPlayersInfo()
 	g.resetQueue()
@@ -269,4 +263,8 @@ func (g *gameImpl) printPlayerPosition(p Player) {
 
 func (g *gameImpl) printWin() {
 	fmt.Printf("%78s\n", "Won!!!")
+}
+
+func (g *gameImpl) printGameEnd() {
+	fmt.Printf("%92s\n", "All player are winning Reset Game!!")
 }

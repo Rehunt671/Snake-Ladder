@@ -6,7 +6,6 @@ type Dice interface {
 	Roll() int
 }
 
-// FINISH: change max to faces
 type diceImpl struct {
 	faces int
 }
