@@ -176,15 +176,15 @@ func (g *gameImpl) renderBoard() {
 	size := board.GetSize()
 	g.printBorder()
 
-	for i := size - 1; i >= 0; i-- {
-		if i%2 == 0 {
-			for j := 0; j < size; j++ {
-				regionIndex := size*i + j
+	for row := size - 1; row >= 0; row-- {
+		if row%2 == 0 {
+			for collumn := 0; collumn < size; collumn++ {
+				regionIndex := size*row + collumn
 				g.printRegion(regionIndex)
 			}
 		} else {
-			for j := size - 1; j >= 0; j-- {
-				regionIndex := size*i + j
+			for collumn := size - 1; collumn >= 0; collumn-- {
+				regionIndex := size*row + collumn
 				g.printRegion(regionIndex)
 			}
 		}
