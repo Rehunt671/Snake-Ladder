@@ -8,6 +8,7 @@ type Player interface {
 	GetIsWin() bool
 }
 
+// TODO: pos => position
 type playerImpl struct {
 	name  string
 	pos   int

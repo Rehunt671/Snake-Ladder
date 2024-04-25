@@ -8,6 +8,13 @@ import (
 	"github.com/snake-ladder/constants"
 )
 
+// TODO: p => player in all file except player file
+// TODO: pos => position
+// TODO: newPos => newPosition
+// TODO: chage variable in for loop
+// TODO: idx => index
+// TODO: ok , val => ... ?
+// TODO: render => renderGameMap
 type Game interface {
 	AddPlayer(name string)
 	Play()
