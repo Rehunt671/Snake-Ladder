@@ -8,29 +8,28 @@ type Player interface {
 	GetIsWin() bool
 }
 
-// TODO: pos => position
 type playerImpl struct {
-	name  string
-	pos   int
-	isWin bool
+	name     string
+	position int
+	isWin    bool
 }
 
 func NewPlayer(name string) Player {
 	return &playerImpl{
-		name: name,
-		pos:  1,
+		name:     name,
+		position: 1,
 	}
 }
 
 func (p *playerImpl) GetPos() int {
-	return p.pos
+	return p.position
 }
 func (p *playerImpl) GetName() string {
 	return p.name
 }
 
-func (p *playerImpl) SetPos(newPos int) {
-	p.pos = newPos
+func (p *playerImpl) SetPos(newPosition int) {
+	p.position = newPosition
 }
 
 func (p *playerImpl) SetIsWin(isWin bool) {
