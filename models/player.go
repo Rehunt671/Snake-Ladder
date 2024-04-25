@@ -2,8 +2,8 @@ package models
 
 type Player interface {
 	GetName() string
-	GetPos() int
-	SetPos(int)
+	GetPosition() int
+	SetPosition(int)
 	SetIsWin(bool)
 	GetIsWin() bool
 }
@@ -21,14 +21,14 @@ func NewPlayer(name string) Player {
 	}
 }
 
-func (p *playerImpl) GetPos() int {
+func (p *playerImpl) GetPosition() int {
 	return p.position
 }
 func (p *playerImpl) GetName() string {
 	return p.name
 }
 
-func (p *playerImpl) SetPos(newPosition int) {
+func (p *playerImpl) SetPosition(newPosition int) {
 	p.position = newPosition
 }
 

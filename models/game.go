@@ -11,12 +11,10 @@ import (
 // FINISH: p => player in all file except player file
 // FINISH: pos => position
 // FINISH: newPos => newPosition
-// TODO: change variable in for loop
+// FINISH: change i variable in for loop
 // FINISH: idx => index
-// TODO: ok , val => ... ?
-// FINISH: render => renderBoard
+// FINISH: ok , val => ... ?
 type Game interface {
-	AddPlayer(name string)
 	Play()
 }
 
@@ -27,18 +25,14 @@ type gameImpl struct {
 	turnIndex int
 }
 
-func NewGame(numberOfSnakes int, numberOfLadders int, boardSize int) Game {
-	return &gameImpl{
-		dice:    NewDice(constants.MAX_DICE_FACES),
-		board:   NewBoard(numberOfSnakes, numberOfLadders, boardSize),
-		players: []Player{},
+func NewGame(playerNames []string, numberOfSnakes int, numberOfLadders int, boardSize int) Game {
+	g := &gameImpl{
+		dice:  NewDice(constants.MAX_DICE_FACES),
+		board: NewBoard(numberOfSnakes, numberOfLadders, boardSize),
 	}
-}
+	g.initPlayers(playerNames)
 
-func (g *gameImpl) AddPlayer(name string) {
-	player := NewPlayer(name)
-	g.players = append(g.players, player)
-	g.setPosition(player, 1)
+	return g
 }
 
 func (g *gameImpl) Play() {
@@ -55,14 +49,24 @@ func (g *gameImpl) Play() {
 	}
 }
 
+func (g *gameImpl) initPlayers(playerNames []string) {
+	for _, playerName := range playerNames {
+		player := NewPlayer(playerName)
+		g.players = append(g.players, player)
+		g.setPosition(player, 1)
+	}
+}
+
 func (g *gameImpl) playRound() {
 	currentPlayer := g.getCurrentPlayer()
 	g.printInformation(currentPlayer)
 
-	faces := g.dice.Roll()
-	g.printDiceFace(faces)
+	// FINISH: faces => step
+	step := g.dice.Roll()
+	g.printDiceFace(step)
 
-	newPosition := g.setPosition(currentPlayer, currentPlayer.GetPos()+faces)
+	destination := currentPlayer.GetPosition() + step
+	newPosition := g.setPosition(currentPlayer, destination)
 	g.printPlayerPosition(currentPlayer)
 
 	if g.board.IsDestination(newPosition) {
@@ -71,22 +75,23 @@ func (g *gameImpl) playRound() {
 	}
 }
 
+// FINISH: getValidPosition function name => findValidPosition
 func (g *gameImpl) setPosition(player Player, newPosition int) int {
-	newPosition = g.getValidPosition(newPosition)
+	newPosition = g.findValidPosition(newPosition)
 	g.setStanOn(player, newPosition)
-	player.SetPos(newPosition)
+	player.SetPosition(newPosition)
 
 	return newPosition
 }
 
 func (g *gameImpl) setStanOn(player Player, newPosition int) {
-	oldCell := g.board.GetCell(player.GetPos() - 1)
+	oldCell := g.board.GetCell(player.GetPosition() - 1)
 	newCell := g.board.GetCell(newPosition - 1)
 	oldCell.RemovePlayer(player)
 	newCell.AddPlayer(player)
 }
 
-func (g *gameImpl) getValidPosition(position int) int {
+func (g *gameImpl) findValidPosition(position int) int {
 	size := g.board.GetSize()
 	boardSize := size * size
 
@@ -95,14 +100,14 @@ func (g *gameImpl) getValidPosition(position int) int {
 		return boardSize - gap
 	}
 
-	if ok, val := g.isLadder(position); ok {
-		g.printClimbLadder(position, val)
-		return val
+	if isLadder, end := g.isLadder(position); isLadder {
+		g.printClimbLadder(position, end)
+		return end
 	}
 
-	if ok, val := g.isSnake(position); ok {
-		g.printGotBittenBySnake(position, val)
-		return val
+	if isLadder, end := g.isSnake(position); isLadder {
+		g.printGotBittenBySnake(position, end)
+		return end
 	}
 
 	return position
@@ -110,9 +115,9 @@ func (g *gameImpl) getValidPosition(position int) int {
 
 func (g *gameImpl) isLadder(position int) (bool, int) {
 	board := g.board
-	for _, val := range board.GetLadders() {
-		if val.GetStart() == position {
-			return true, val.GetEnd()
+	for _, ladder := range board.GetLadders() {
+		if ladder.GetStart() == position {
+			return true, ladder.GetEnd()
 		}
 	}
 
@@ -122,9 +127,9 @@ func (g *gameImpl) isLadder(position int) (bool, int) {
 func (g *gameImpl) isSnake(position int) (bool, int) {
 	board := g.board
 
-	for _, val := range board.GetSnakes() {
-		if val.GetStart() == position {
-			return true, val.GetEnd()
+	for _, snake := range board.GetSnakes() {
+		if snake.GetStart() == position {
+			return true, snake.GetEnd()
 		}
 	}
 
@@ -140,8 +145,8 @@ func (g *gameImpl) resetBoard() {
 	size := board.GetSize()
 	boardSize := size * size
 
-	for i := 0; i < boardSize; i++ {
-		cell := board.GetCell(i)
+	for boardIndex := 0; boardIndex < boardSize; boardIndex++ {
+		cell := board.GetCell(boardIndex)
 		playersOnCell := cell.GetPlayers()
 		cell.SetPlayers(playersOnCell[:0])
 	}
@@ -165,6 +170,7 @@ func (g *gameImpl) resetGame() {
 	g.resetQueue()
 }
 
+// FINISH: render => renderBoard
 func (g *gameImpl) renderBoard() {
 	board := g.board
 	size := board.GetSize()
@@ -173,13 +179,13 @@ func (g *gameImpl) renderBoard() {
 	for i := size - 1; i >= 0; i-- {
 		if i%2 == 0 {
 			for j := 0; j < size; j++ {
-				index := size*i + j
-				g.printRegion(index)
+				regionIndex := size*i + j
+				g.printRegion(regionIndex)
 			}
 		} else {
 			for j := size - 1; j >= 0; j-- {
-				index := size*i + j
-				g.printRegion(index)
+				regionIndex := size*i + j
+				g.printRegion(regionIndex)
 			}
 		}
 		fmt.Println()
@@ -265,7 +271,7 @@ func (g *gameImpl) printDiceFace(roll int) {
 }
 
 func (g *gameImpl) printPlayerPosition(player Player) {
-	fmt.Printf("%70s %s %d\n", player.GetName(), "Position =", player.GetPos())
+	fmt.Printf("%70s %s %d\n", player.GetName(), "Position =", player.GetPosition())
 }
 
 func (g *gameImpl) printWin() {

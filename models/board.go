@@ -55,7 +55,7 @@ func (b *boardImpl) GetSnakes() []Snake {
 func (b *boardImpl) initSnakes(snakeNumber int, size int, snakeLadderMap *map[int]int) {
 	boardSize := size * size
 
-	for i := 0; i < snakeNumber; i++ {
+	for snakeIndex := 0; snakeIndex < snakeNumber; snakeIndex++ {
 		for {
 			start := rand.Intn(boardSize) + 1
 			end := rand.Intn(boardSize) + 1
@@ -72,7 +72,7 @@ func (b *boardImpl) initSnakes(snakeNumber int, size int, snakeLadderMap *map[in
 func (b *boardImpl) initLadders(ladderNumber int, size int, snakeLadderMap *map[int]int) {
 	boardSize := size * size
 
-	for i := 0; i < ladderNumber; i++ {
+	for ladderIndex := 0; ladderIndex < ladderNumber; ladderIndex++ {
 		for {
 			start := rand.Intn(boardSize) + 1
 			end := rand.Intn(boardSize) + 1
@@ -94,37 +94,38 @@ func (b *boardImpl) initCells() {
 
 func (b *boardImpl) addNumberSymbol() {
 	size := b.size
+	boardSize := size * size
 
-	for i := 0; i < size*size; i++ {
-		cell := NewCell([]string{strconv.Itoa(i + 1)})
+	for boardIndex := 0; boardIndex < boardSize; boardIndex++ {
+		cell := NewCell([]string{strconv.Itoa(boardIndex + 1)})
 		b.cells = append(b.cells, cell)
 	}
 }
 
 func (b *boardImpl) addLadderSymbol() {
-	for i, ladder := range b.ladders {
+	for ladderIndex, ladder := range b.ladders {
 		start := ladder.GetStart()
 		cell := b.cells[start-1]
-		newSymbols := append(cell.GetSymbols(), fmt.Sprintf("L%d", i+1))
+		newSymbols := append(cell.GetSymbols(), fmt.Sprintf("L%d", ladderIndex+1))
 		cell.SetSymbols(newSymbols)
 
 		end := ladder.GetEnd()
 		cell = b.cells[end-1]
-		newSymbols = append(cell.GetSymbols(), fmt.Sprintf("l%d", i+1))
+		newSymbols = append(cell.GetSymbols(), fmt.Sprintf("l%d", ladderIndex+1))
 		cell.SetSymbols(newSymbols)
 	}
 }
 
 func (b *boardImpl) addSnakesSymbol() {
-	for i, snake := range b.snakes {
+	for snakeIndex, snake := range b.snakes {
 		start := snake.GetStart()
 		cell := b.cells[start-1]
-		newSymbols := append(cell.GetSymbols(), fmt.Sprintf("S%d", i+1))
+		newSymbols := append(cell.GetSymbols(), fmt.Sprintf("S%d", snakeIndex+1))
 		cell.SetSymbols(newSymbols)
 
 		end := snake.GetEnd()
 		cell = b.cells[end-1]
-		newSymbols = append(cell.GetSymbols(), fmt.Sprintf("s%d", i+1))
+		newSymbols = append(cell.GetSymbols(), fmt.Sprintf("s%d", snakeIndex+1))
 		cell.SetSymbols(newSymbols)
 	}
 }
